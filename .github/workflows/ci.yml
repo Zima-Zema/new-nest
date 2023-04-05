@@ -9,10 +9,10 @@ jobs:
       - name: Checkov Scan Dockerfile
         run: |
           ls ${{ github.workspace }}
-          output=`docker run --tty --volume ${{ github.workspace }}:/wd bridgecrew/checkov --file /wd/Dockerfile --compact --quiet`
+          # output=`docker run --tty --volume /home/runner/work/new-nest/new-nest/:/wd bridgecrew/checkov --file /wd/Dockerfile --compact --quiet`
           echo $output
-          # result=`echo $output | sed 's/, /\n/g' | grep 'Failed checks' | awk -F ': ' '{print $1+$2}'`
-          # if [ -z "$result" ] ; then result=1 ; else result=0 ; fi
-          # echo "Exit ${result}"
-          # exit $result
-          exit 0
+          result=`echo $output | sed 's/, /\n/g' | grep 'Failed checks' | awk -F ': ' '{print $1+$2}'`
+          if [ -z "$result" ] ; then result=1 ; else result=0 ; fi
+          echo "Exit ${result}"
+          exit $result
+
