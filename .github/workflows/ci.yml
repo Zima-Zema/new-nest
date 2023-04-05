@@ -6,7 +6,7 @@ jobs:
     steps:
       - name: Checkov Scan Dockerfile
         run: |
-          output=`docker run --tty --volume $(System.DefaultWorkingDirectory):/wd bridgecrew/checkov --file /wd/Dockerfile --compact --quiet --skip-check CKV_DOCKER_2`
+          output=`docker run --tty --volume $(GITHUB_WORKSPACE):/wd bridgecrew/checkov --file /wd/Dockerfile --compact --quiet`
           echo $output
           result=`echo $output | sed 's/, /\n/g' | grep 'Failed checks' | awk -F ': ' '{print $1+$2}'`
           echo "Exit ${result}"
