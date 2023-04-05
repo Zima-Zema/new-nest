@@ -8,7 +8,8 @@ jobs:
         run: |
           WORKSPACE=$GITHUB_WORKSPACE
           echo "WORKSPACE: $WORKSPACE"
-          output=`docker run --tty --volume $(WORKSPACE):/wd bridgecrew/checkov --file /wd/Dockerfile --compact --quiet`
+          ls /home/runner/work/new-nest
+          output=`docker run --tty --volume /home/runner/work/new-nest/new-nest:/wd bridgecrew/checkov --file /wd/Dockerfile --compact --quiet`
           echo $output
           result=`echo $output | sed 's/, /\n/g' | grep 'Failed checks' | awk -F ': ' '{print $1+$2}'`
           if [ -z "$result" ] ; then result=1 ; else result=0 ; fi
