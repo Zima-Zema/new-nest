@@ -2,7 +2,7 @@ name: new-nest-ci
 on: push
 
 env:
-  tag: $(NBGV_SEMVER1)
+  tag: ${NBGV_SEMVER1}
 
 jobs:
   build:
@@ -13,24 +13,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install dotnet
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '6.0.x'
-
       - name: Install NBGV
-        run: dotnet tool install --tool-path . nbgv
+        uses: dotnet/nbgv@v0.4.0
+        id: nbgv
+        with:
+          setAllVars: true
+          
+      # - name: Install dotnet
+      #   uses: actions/setup-dotnet@v3
+      #   with:
+      #     dotnet-version: '6.0.x'
+
+      # - name: Install NBGV
+      #   run: dotnet tool install --tool-path . nbgv
 
       - name: Set Version
-        run: ./nbgv cloud -a
+        run: echo 'tag=${{ steps.nbgv.outputs.SemVer1 }}' >> $GITHUB_ENV
         if: ${{ github.ref_name == 'main' }}
       
       - name: Set Tag to BuildNumber
-        run: echo "tag=$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+        run: echo "tag=${{ github.run_number }}" >> $GITHUB_ENV
         if: ${{ github.ref_name != 'main' }}
 
       - name: Echo env
-        run: env
+        run: env.tag
 
 
       - name: Checkov Scan Dockerfile
