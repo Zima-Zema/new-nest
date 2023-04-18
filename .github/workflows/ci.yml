@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Install dotnet
         uses: actions/setup-dotnet@v3
@@ -27,7 +29,7 @@ jobs:
         run: echo "tag=$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
         if: ${{ github.ref_name != 'main' }}
 
-      - name: Set Tag to BuildNumber
+      - name: Echo env
         run: env
 
 
