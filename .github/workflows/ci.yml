@@ -2,7 +2,10 @@ name: new-nest-ci
 on: push
 
 env:
-  tag: ${NBGV_SEMVER1}
+  tag: $(NBGV_SemVer1)
+  projectName: "new-nest"
+  repository: "new-nest"
+  acr: "devoperation.azurecr.io"
 
 jobs:
   build:
@@ -18,14 +21,6 @@ jobs:
         id: nbgv
         with:
           setAllVars: true
-          
-      # - name: Install dotnet
-      #   uses: actions/setup-dotnet@v3
-      #   with:
-      #     dotnet-version: '6.0.x'
-
-      # - name: Install NBGV
-      #   run: dotnet tool install --tool-path . nbgv
 
       - name: Set Version
         run: echo 'tag=${{ steps.nbgv.outputs.SemVer1 }}' >> $GITHUB_ENV
@@ -34,10 +29,6 @@ jobs:
       - name: Set Tag to BuildNumber
         run: echo "tag=${{ github.run_number }}" >> $GITHUB_ENV
         if: ${{ github.ref_name != 'main' }}
-
-      - name: Echo env
-        run: echo "${{ env.tag }}"
-
 
       - name: Checkov Scan Dockerfile
         run: |
@@ -48,3 +39,21 @@ jobs:
           exit $result
         shell: bash
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Login to ACR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.acr }}
+          username: ${{ secrets.AZURE_ACR_USERNAME }}
+          password: ${{ secrets.AZURE_ACR_PASSWORD }}
+      
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: ${{ env.acr }}/${{ env.repository }}:${{ env.tag }}
