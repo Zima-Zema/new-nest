@@ -56,7 +56,19 @@ jobs:
           load: true
           tags: ${{ env.acr }}/${{ env.repository }}:${{ env.tag }}
 
-      - name: Snyk Scan
+      - uses: snyk/actions/docker@0.3.0
+        env:
+        # In order to use the Snyk Action you will need to have a Snyk API token.
+        # More details in https://github.com/snyk/actions#getting-your-snyk-token
+        # or you can signup for free at https://snyk.io/login
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          image: ${{ env.acr }}/${{ env.repository }}:${{ env.tag }}
+          args: --file=Dockerfile --exclude-app-vulns --severity-threshold=low
+
+          
+      - name: Snyk Test
         # Snyk can be used to break the build when it detects vulnerabilities.
         # In this case we want to upload the issues to GitHub Code Scanning
         continue-on-error: false
@@ -67,13 +79,13 @@ jobs:
         # or you can signup for free at https://snyk.io/login
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
+          command: test
           image: ${{ env.acr }}/${{ env.repository }}:${{ env.tag }}
           args: --file=Dockerfile --exclude-app-vulns --severity-threshold=low
 
-
-      # - name: Push Docker Image
-      #   uses: docker/build-push-action@v4
-      #   if: ${{ github.ref_name == 'main' }}
-      #   with:
-      #     push: true
-      #     tags: ${{ env.acr }}/${{ env.repository }}:${{ env.tag }}
+      - name: Push Docker Image
+        uses: docker/build-push-action@v4
+        if: ${{ github.ref_name == 'main' }}
+        with:
+          push: true
+          tags: ${{ env.acr }}/${{ env.repository }}:${{ env.tag }}
